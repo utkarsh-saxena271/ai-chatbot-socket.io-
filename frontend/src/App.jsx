@@ -36,7 +36,7 @@ function App() {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <h1>Chat Application</h1>
+        <h1>My Ai-Chatbot</h1>
       </div>
       
       <div className="messages-container">
