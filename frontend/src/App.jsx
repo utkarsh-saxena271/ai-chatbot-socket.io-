@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { io } from "socket.io-client";
 import './App.css'
 
 function App() {
+  const [socket, setSocket] = useState(null)
   const [message, setMessage] = useState('')
   const [conversations, setConversations] = useState([])
 
@@ -10,22 +12,26 @@ function App() {
     if (message.trim()) {
       // Add outgoing message
       setConversations([...conversations, { text: message, time: new Date().toLocaleTimeString(), type: 'outgoing' }])
-      
-      // Simulate incoming message after 1 second
-      setTimeout(() => {
-        setConversations(prevConversations => [
-          ...prevConversations, 
-          { 
-            text: `Reply to: ${message}`, 
-            time: new Date().toLocaleTimeString(), 
-            type: 'incoming'
-          }
-        ])
-      }, 1000)
-      
+      socket.emit('ai-message',message )
       setMessage('')
     }
   }
+  useEffect(()=>{
+    let  socketInstance = io("http://localhost:3000");
+    setSocket(socketInstance)
+
+    socketInstance.on('ai-message-response',(response)=>{
+       const botMessage = {
+        id: Date.now()+1,
+        text : response,
+        sender: 'bot',
+        type : 'incoming'
+       }
+       setConversations(prevConversations => [
+          ...prevConversations, botMessage
+        ])
+    })
+  },[ ])
 
   return (
     <div className="chat-container">
